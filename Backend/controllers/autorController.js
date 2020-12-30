@@ -18,7 +18,35 @@ function guardar(req, res) {
 
     })
 }
+function modificar(req, res) {
 
+
+    Autor.findOneAndUpdate({_id:req.params.id}, {
+        nombre:req.body.nombre,
+        apellido:req.body.apellido,
+        edad : req.body.edad,
+        rut :req.body.rut
+     }, function(err, result) {
+        if (err) {
+          res.send(err);
+        } else {
+       
+            res.status(200).send({mensaje:"Modificado"})
+        }
+      });
+    
+    
+}
+function eliminar(req,res){
+    Autor.findByIdAndDelete(req.params.id,function(err, result) {
+        if (err) {
+          res.send(err);
+        } else {
+       
+            res.status(200).send({mensaje:"Eliminado"})
+        }
+      });
+}
 
 function todos(req, res) {
 
@@ -32,6 +60,8 @@ function todos(req, res) {
 
 module.exports = {
     guardar,
-   todos
+   todos,
+   modificar,
+   eliminar
     
 };
