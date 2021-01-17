@@ -14,6 +14,7 @@ import Container from '@material-ui/core/Container';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import MaterialDatatable from "material-datatable";
+// import prestamos from '../../../Backend/modelos/prestamos';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -40,27 +41,25 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-export default function Autor() {
+export default function Prestamo() {
   const classes = useStyles();
 
   const { register, handleSubmit, errors,getValues,setValue,reset } = useForm(
-    {defaultValues:{nombre:"Nombre *",apellido:"Apellido *",edad:"Edad *",rut:"Rut *"}});
+    {defaultValues:{idPersona:"_id de Persona *",libro:"_id de Libro *"}});
   
   const [contador, setContador] = useState(0)
-  const [autores, setAutores] = useState([])
+//   const [autores, setAutores] = useState([])
+  const [prestamos, setPrestamos] = useState([])
   const [accion,setAccion]= useState("Guardar")
-  const [idAutor,setIdAutor] = useState(null);
+  const [idPrestamo,setIdPrestamo] = useState(null);
 
   useEffect(() => {
-    cargarAutor();
+    cargarPrestamo();
   }, []);
 
   const seleccionar = (item) =>{
-    setValue("nombre",item.nombre)
-    setValue("apellido",item.apellido)
-    setValue("edad",item.edad)
-    setValue("rut",item.rut)
-    setIdAutor(item._id)
+    setValue("_id Persona",item.idPersona)
+    setValue("_id Libro",item.libro)
     setAccion("Modificar")
     
     
@@ -84,12 +83,12 @@ export default function Autor() {
       },
     },
     {
-      name: 'Nombre',
-      field: 'nombre'
+      name: '_id de Persona',
+      field: 'idPersona'
     },
     {
-      name: 'Apellido',
-      field: 'apellido'
+      name: '_id de Libro',
+      field: 'libro'
     },
     {
       name: 'ID de Autor',
@@ -122,16 +121,18 @@ export default function Autor() {
     rowsPerPageOptions: [5, 10, 25],
     sortColumnDirection: "desc",
   }
+
+
   const onSubmit = data => {
 
     if(accion=="Guardar"){
       axios
-      .post("http://localhost:9000/api/autor", data)
+      .post("http://localhost:9000/api/prestamo", data)
       .then(
         (response) => {
           if (response.status == 200) {
             alert("Registro ok")
-            cargarAutor();
+            cargarPrestamo();
             reset();
           }
         },
@@ -152,82 +153,14 @@ export default function Autor() {
         console.log(error);
       });
     }
-   if(accion=="Modificar"){
-    axios
-    .put("http://localhost:9000/api/autor/"+idAutor, data)
-    .then(
-      (response) => {
-        if (response.status == 200) {
-          alert("Modificado")
-          cargarAutor();
-          reset();
-          setIdAutor(null)
-          setAccion("Guardar")
-          console.log(response.data)
-        }
-      },
-      (error) => {
-        // Swal.fire(
-        //   "Error",
-        //   "No es posible realizar esta acción: " + error.message,
-        //   "error"
-        // );
-      }
-    )
-    .catch((error) => {
-      // Swal.fire(
-      //   "Error",
-      //   "No cuenta con los permisos suficientes para realizar esta acción",
-      //   "error"
-      // );
-      console.log(error);
-    });
-   }
-
   }
 
-  const eliminar =() =>{
-    if(idAutor==null){
-      alert("Debe seleccionar un autor")
-      return
-    }
-    axios
-    .delete("http://localhost:9000/api/autor/"+idAutor)
-    .then(
-      (response) => {
-        if (response.status == 200) {
-
-          cargarAutor();
-          reset();
-          setIdAutor(null)
-          setAccion("Guardar")
-          console.log(response.data)
-          alert("Eliminado")
-        }
-      },
-      (error) => {
-        // Swal.fire(
-        //   "Error",
-        //   "No es posible realizar esta acción: " + error.message,
-        //   "error"
-        // );
-      }
-    )
-    .catch((error) => {
-      // Swal.fire(
-      //   "Error",
-      //   "No cuenta con los permisos suficientes para realizar esta acción",
-      //   "error"
-      // );
-      console.log(error);
-    });
-  }
-  const cargarAutor = async () => {
+  const cargarPrestamo = async () => {
     // const { data } = await axios.get('/api/zona/listar');
 
-    const { data } = await axios.get("http://localhost:9000/api/autor");
+    const { data } = await axios.get("http://localhost:9000/api/prestamo");
     
-    setAutores(data.autor);
+    setPrestamos(data.prestamos);
 
 
   };
@@ -244,24 +177,24 @@ export default function Autor() {
             variant="contained"
         
             className={classes.submit}
-            onClick = {()=>{reset();setAccion("Guardar");setIdAutor(null)}}
+            onClick = {()=>{reset();setAccion("Guardar");setIdPrestamo(null)}}
           >
           Nuevo
           </Button>
         <Typography component="h1" variant="h5">
-          Autor - Contador: {contador}
+          Prestamo - Contador: {contador}
         </Typography>
         <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 autoComplete="fname"
-                name="nombre"
+                name="idPersona"
                 variant="outlined"
                 required
                 fullWidth
-                id="firstName"
-                label="Nombre"
+                id="idPersona"
+                label="id Persona"
                 autoFocus
                 inputRef={register}
               />
@@ -271,10 +204,10 @@ export default function Autor() {
                 variant="outlined"
                 required
                 fullWidth
-                id="lastName"
-                label="Last Name"
-                name="apellido"
-                autoComplete="lname"
+                id="libro"
+                label="id Libro"
+                name="libro"
+                autoComplete="libro"
                 inputRef={register}
               />
             </Grid>
@@ -283,24 +216,11 @@ export default function Autor() {
                 variant="outlined"
                 required
                 fullWidth
-                id="edad"
-                label="Edad"
-                name="edad"
-                autoComplete="edad"
+                id="fecha"
+                label="fecha"
+                name="fecha"
+                autoComplete="fecha"
                 inputRef={register}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="rut"
-                label="rut"
-                id="rut"
-                autoComplete="rut"
-                inputRef={register}
-        
               />
             </Grid>
 
@@ -314,21 +234,11 @@ export default function Autor() {
           >
             {accion}
           </Button>
-          <Button
-            type="button"
-            fullWidth
-            variant="contained"
-            color="secondary"
-            className={classes.delete}
-            onClick = {()=>{eliminar()}}
-          >
-            Eliminar
-          </Button>
           <Grid container spacing={1}>
             <MaterialDatatable
         
-              title={"Autores"}
-              data={autores}
+              title={"Prestamos"}
+              data={prestamos}
               columns={columns}
               options={options}
             />

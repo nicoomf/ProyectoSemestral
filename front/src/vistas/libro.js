@@ -16,6 +16,7 @@ import axios from 'axios';
 import MaterialDatatable from "material-datatable";
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -45,23 +46,54 @@ export default function Autor() {
   const classes = useStyles();
 
   const { register, handleSubmit, errors, getValues, setValue, reset } = useForm(
-    { defaultValues: { nombre: "Nombre *", apellido: "Apellido *", edad: "Edad *", rut: "Rut *" } });
+    { defaultValues: { nombre: "Nombre Libro *", codigo: "Codigo *", autor: "_id de Autor *"}});
 
   const [contador, setContador] = useState(0)
-  const [autores, setAutores] = useState([])
+  // const [autores, setAutores] = useState([])
+  const [libros, setLibros] = useState([])
   const [accion, setAccion] = useState("Guardar")
-  const [idAutor, setIdAutor] = useState(null);
+  // const [idAutor, setIdAutor] = useState(null);
+  const [idLibro, setIdLibro] = useState(null);
+
+  const [autorSeleccionado, setAutorSeleccionado] = useState(0);
+  const [autores,setAutores] = useState([]);
+  const [horarios, sethorarioSelect] = useState(0);
 
   useEffect(() => {
-    cargarAutor();
+    cargarLibro();
   }, []);
+
+  useEffect(() => {
+    cargarAutores()
+
+  }, []);
+
+  function cargarAutores()
+  {
+  
+      axios.get("http://localhost:9000/api/autor").then(
+        (response) => {
+          setAutores(response.data);
+          console.log(response.data);
+        },
+        (error) => {
+         alert("error");
+        }
+      );
+  }
+
+  // const ModificaAutorSeleccionado = (event) => {
+  //   sethorarioSelect(event.target.value);
+  // };
+
 
   const seleccionar = (item) => {
     setValue("nombre", item.nombre)
-    setValue("apellido", item.apellido)
-    setValue("edad", item.edad)
-    setValue("rut", item.rut)
-    setIdAutor(item._id)
+    setValue("codigo", item.codigo)
+    setValue("autor", item.idautor)
+    setValue("idautor", )
+    // setIdAutor(item._id)
+    setIdLibro(item._id)
     setAccion("Modificar")
 
 
@@ -89,8 +121,12 @@ export default function Autor() {
       field: 'nombre'
     },
     {
-      name: 'Apellido',
-      field: 'apellido'
+      name: 'Codigo',
+      field: 'codigo'
+    },
+    {
+      name: '_id de Libro',
+      field: '_id'
     }
 
 
@@ -120,11 +156,48 @@ export default function Autor() {
     rowsPerPageOptions: [5, 10, 25],
     sortColumnDirection: "desc",
   }
+
+  // const guardarLibro = (data) => {
+
+  //   axios
+  //     .post("http://localhost:9000/api/libro",
+  //     {
+  //       codigo: data.codigo,
+  //       nombre: data.nombre,
+  //       autor: autorSeleccionado
+  //     })
+  //     .then(
+  //       (response) => {
+  //         if (response.status == 200) {
+  //           alert("Registro Ok")
+  //           cargarAutores();
+  //           reset();
+  //         }
+  //       },
+  //       (error) => {
+  //           // Swal.fire(
+  //           //   "Error",
+  //           //   "No es posible realizar esta acción: " + error.message,
+  //           //   "error"
+  //           // );
+  //       }
+  //     )
+  //     .catch((error) => {
+  //         // Swal.fire(
+  //         //   "Error",
+  //         //   "No cuenta con los permisos suficientes para realizar esta acción",
+  //         //   "error"
+  //         // );
+  //         console.log(error);
+  //     });
+
+  // }
+
   const onSubmit = data => {
 
     if (accion == "Guardar") {
       axios
-        .post("http://localhost:9000/api/autor", data, {
+        .post("http://localhost:9000/api/libro", data, {
           headers: {
             Accept: '*/*'
           }
@@ -133,7 +206,7 @@ export default function Autor() {
           (response) => {
             if (response.status == 200) {
               alert("Registro ok")
-              cargarAutor();
+              cargarLibro();
               reset();
             }
           },
@@ -154,85 +227,27 @@ export default function Autor() {
           console.log(error);
         });
     }
-    if (accion == "Modificar") {
-      axios
-        .put("http://localhost:9000/api/autor/" + idAutor, data)
-        .then(
-          (response) => {
-            if (response.status == 200) {
-              alert("Modificado")
-              cargarAutor();
-              reset();
-              setIdAutor(null)
-              setAccion("Guardar")
-              console.log(response.data)
-            }
-          },
-          (error) => {
-            // Swal.fire(
-            //   "Error",
-            //   "No es posible realizar esta acción: " + error.message,
-            //   "error"
-            // );
-          }
-        )
-        .catch((error) => {
-          // Swal.fire(
-          //   "Error",
-          //   "No cuenta con los permisos suficientes para realizar esta acción",
-          //   "error"
-          // );
-          console.log(error);
-        });
-    }
-
   }
 
-  const eliminar = () => {
-    if (idAutor == null) {
-      alert("Debe seleccionar un autor")
-      return
-    }
-    axios
-      .delete("http://localhost:9000/api/autor/" + idAutor)
-      .then(
-        (response) => {
-          if (response.status == 200) {
-
-            cargarAutor();
-            reset();
-            setIdAutor(null)
-            setAccion("Guardar")
-            console.log(response.data)
-            alert("Eliminado")
-          }
-        },
-        (error) => {
-          // Swal.fire(
-          //   "Error",
-          //   "No es posible realizar esta acción: " + error.message,
-          //   "error"
-          // );
-        }
-      )
-      .catch((error) => {
-        // Swal.fire(
-        //   "Error",
-        //   "No cuenta con los permisos suficientes para realizar esta acción",
-        //   "error"
-        // );
-        console.log(error);
-      });
-  }
-  const cargarAutor = async () => {
+  const cargarLibro = async () => {
     // const { data } = await axios.get('/api/zona/listar');
 
-    const { data } = await axios.get("http://localhost:9000/api/autor");
+    const { data } = await axios.get("http://localhost:9000/api/libro");
 
-    setAutores(data.autor);
-
-
+    setLibros(data.libroConAutor);
   };
+
+  // const autoresEnSelect = (autores) => {
+  //   autores.map(function (item, index) {
+  //     return (
+  //       <MenuItem key={index} value={item._id}>
+  //         <em>{item.nombre}</em>
+  //       </MenuItem>
+  //     );
+  //   })
+  // }
+
+
   function click2() {
     setContador(contador + 1);
   }
@@ -246,12 +261,12 @@ export default function Autor() {
           variant="contained"
 
           className={classes.submit}
-          onClick={() => { reset(); setAccion("Guardar"); setIdAutor(null) }}
+          onClick={() => { reset(); setAccion("Guardar"); setIdLibro(null) }}
         >
           Nuevo
           </Button>
         <Typography component="h1" variant="h5">
-          Autor - Contador: {contador}
+          Libro - Contador: {contador}
         </Typography>
         <form className={classes.form} onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2}>
@@ -273,37 +288,62 @@ export default function Autor() {
                 variant="outlined"
                 required
                 fullWidth
-                id="lastName"
-                label="Last Name"
-                name="apellido"
-                autoComplete="lname"
+                id="Codigo"
+                label="Codigo"
+                name="codigo"
+                autoComplete="codigo"
                 inputRef={register}
               />
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Select
-                labelId="demo-customized-select-label"
-                id="demo-customized-select"
-      
+                onChange={ModificaAutorSeleccionado}
+                value={autorSeleccionado}
+                labelWidth={"Autor"}
+                margin="dense"
+                placeholder={"Horarios"}
               >
-                <MenuItem value="">
-                  <em>None</em>
+                <MenuItem selected={true} key={1} value={0}>
+                  Seleccione Autor
                 </MenuItem>
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
+
+                {autoresEnSelect}
+
+                {autores.forEach(element => {
+                  autores.map(function (item, index) {
+                    return(
+                      <MenuItem key={index} value={item._id}>
+                        <em>{item.nombre}</em>
+                      </MenuItem>
+                    );
+                  })
+                })}
+
+                {(autores !== null) ? (
+                  autores.map(function (item, index) {
+                    return (
+                      <MenuItem key={index} value={item._id}>
+                        <em>{item.nombre}</em>
+                      </MenuItem>
+                    );
+                  })
+                ) : (
+                    <MenuItem key={-1} value={0}>
+                      <em>''</em>
+                    </MenuItem>
+                  )}
               </Select>
               
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
                 fullWidth
-                name="rut"
-                label="rut"
-                id="rut"
-                autoComplete="rut"
+                name="idautor"
+                label="_id de Autor"
+                id="idautor"
+                autoComplete="autor"
                 inputRef={register}
 
               />
@@ -319,21 +359,11 @@ export default function Autor() {
           >
             {accion}
           </Button>
-          <Button
-            type="button"
-            fullWidth
-            variant="contained"
-            color="secondary"
-            className={classes.delete}
-            onClick={() => { eliminar() }}
-          >
-            Eliminar
-          </Button>
           <Grid container spacing={1}>
             <MaterialDatatable
 
-              title={"Autores"}
-              data={autores}
+              title={"Libros"}
+              data={libros}
               columns={columns}
               options={options}
             />
